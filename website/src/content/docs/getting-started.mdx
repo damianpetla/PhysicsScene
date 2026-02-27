@@ -1,0 +1,30 @@
+---
+title: Getting Started
+description: Install and run PhysicsScene.
+---
+
+## Install
+
+```kotlin
+dependencies {
+  implementation("io.github.damianpetla:physics-scene:0.1.0")
+}
+```
+
+## Minimal scene
+
+```kotlin
+val sceneState = rememberPhysicsSceneState()
+
+PhysicsScene(state = sceneState) {
+  Button(
+    onClick = { sceneState.activateBody("cta") },
+    modifier = Modifier.physicsBody(
+      id = "cta",
+      effect = FallingShatterEffect()
+    )
+  ) {
+    Text("Drop")
+  }
+}
+```

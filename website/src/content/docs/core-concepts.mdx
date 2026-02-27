@@ -1,0 +1,20 @@
+---
+title: Core Concepts
+description: Key concepts in PhysicsScene.
+---
+
+## PhysicsScene
+
+Container that hosts your composables and runs the physics world.
+
+## PhysicsSceneState
+
+State holder used to issue commands (`activateBody`, `explode`, `applyLinearImpulse`, etc.) and observe snapshots.
+
+## physicsBody modifier
+
+Registers a composable as a body in the scene.
+
+## Effects
+
+Built-in presets such as `FallingShatterEffect` and `CenterBurstEffect`, plus `CustomEffect` for advanced shaping.
