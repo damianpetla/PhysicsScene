@@ -3,14 +3,27 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.dokka)
     alias(libs.plugins.vanniktech.maven.publish)
 }
 
 val ndkVersionFor16Kb = "29.0.14206865"
 val gdxJniLibsDir = layout.buildDirectory.dir("generated/jniLibs/gdx")
-val gdxNativesArm64 by configurations.creating
-val gdxNativesX8664 by configurations.creating
+val gdxNativesArm64 by configurations.creating {
+    isCanBeConsumed = false
+    isCanBeResolved = true
+}
+val gdxNativesX8664 by configurations.creating {
+    isCanBeConsumed = false
+    isCanBeResolved = true
+}
+
+val shouldApplyDokka = gradle.startParameter.taskNames.any { taskName ->
+    val normalized = taskName.lowercase()
+    normalized.contains("publish") || normalized.contains("dokka")
+}
+if (shouldApplyDokka) {
+    apply(plugin = "org.jetbrains.dokka")
+}
 
 fun readLocalProperty(name: String): String? {
     val localProps = rootProject.file("local.properties")
@@ -117,30 +130,10 @@ dependencies {
     testImplementation(libs.junit)
 }
 
-val extractGdxNatives by tasks.registering(Sync::class) {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    into(gdxJniLibsDir)
-    val arm64Natives = providers.provider { gdxNativesArm64.resolve().map { zipTree(it) } }
-    val x8664Natives = providers.provider { gdxNativesX8664.resolve().map { zipTree(it) } }
+val extractGdxNatives by tasks.registering {
+    outputs.dir(gdxJniLibsDir)
 
-    from(arm64Natives) {
-        include("libgdx-box2d.so")
-        include("libjnigen-runtime.so")
-        into("arm64-v8a")
-    }
-    from(x8664Natives) {
-        include("libgdx-box2d.so")
-        include("libjnigen-runtime.so")
-        into("x86_64")
-    }
-    from(ndkLibcxxArm64Provider) {
-        into("arm64-v8a")
-    }
-    from(ndkLibcxxX8664Provider) {
-        into("x86_64")
-    }
-
-    doFirst {
+    doLast {
         val requiredFiles = listOf(
             ndkLibcxxArm64Provider.get(),
             ndkLibcxxX8664Provider.get(),
@@ -148,6 +141,28 @@ val extractGdxNatives by tasks.registering(Sync::class) {
         requiredFiles.forEach { file ->
             if (!file.exists()) {
                 throw GradleException("Missing NDK libc++ file: ${file.absolutePath}")
+            }
+        }
+
+        sync {
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+            into(gdxJniLibsDir)
+
+            from(gdxNativesArm64.resolve().map(::zipTree)) {
+                include("libgdx-box2d.so")
+                include("libjnigen-runtime.so")
+                into("arm64-v8a")
+            }
+            from(gdxNativesX8664.resolve().map(::zipTree)) {
+                include("libgdx-box2d.so")
+                include("libjnigen-runtime.so")
+                into("x86_64")
+            }
+            from(ndkLibcxxArm64Provider) {
+                into("arm64-v8a")
+            }
+            from(ndkLibcxxX8664Provider) {
+                into("x86_64")
             }
         }
     }
