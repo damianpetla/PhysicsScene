@@ -1,11 +1,48 @@
 ---
 title: Introduction
-description: PhysicsScene overview.
+description: PhysicsScene documentation portal.
+head: []
 ---
 
 PhysicsScene is a Jetpack Compose library that maps existing composables into a Box2D-driven scene.
 
-It is built to deliver physics-based UI effects while preserving your existing layout structure.
+This documentation is structured like an API portal: top navigation for global actions, left sidebar for section browsing, and focused content pages in the center.
+
+<div class="ps-callout">
+  <strong>Top bar features</strong><br />
+  Use the GitHub icon in the header to jump to the repository. Use the theme control in the header to switch between light, dark, and auto mode.
+</div>
+
+## Documentation map
+
+<div class="ps-grid">
+  <div class="ps-card">
+    <h3>Start</h3>
+    <p class="ps-card-copy">Install the library and run your first scene quickly.</p>
+    <a class="ps-card-cta" href="./getting-started/">Open Getting Started</a>
+  </div>
+  <div class="ps-card">
+    <h3>Low-Level API</h3>
+    <p class="ps-card-copy">Understand PhysicsScene, modifier registration, commands, snapshots, and event flow.</p>
+    <a class="ps-card-cta" href="./api/physics-scene/">Open API section</a>
+  </div>
+  <div class="ps-card">
+    <h3>Effects</h3>
+    <p class="ps-card-copy">Choose built-in effects or shape your own using CustomEffect.</p>
+    <a class="ps-card-cta" href="./effects/overview/">Open Effects section</a>
+  </div>
+  <div class="ps-card">
+    <h3>Examples</h3>
+    <p class="ps-card-copy">See practical compositions mirrored from <code>:app-demo</code>.</p>
+    <a class="ps-card-cta" href="./examples/falling-shatter-demo/">Open Examples section</a>
+  </div>
+</div>
+
+## Core building blocks
+
+1. `PhysicsScene(...)` hosts simulation and shard rendering.
+2. `Modifier.physicsBody(...)` registers composables as bodies.
+3. `PhysicsSceneState` dispatches commands and exposes snapshots.
 
 ## Credits
 
@@ -13,12 +50,4 @@ It is built to deliver physics-based UI effects while preserving your existing l
   <img src="https://box2d.org/images/logo.svg" alt="Box2D logo" width="220" />
 </a>
 
-PhysicsScene runs on top of Box2D (via `com.badlogicgames.gdx:gdx-box2d`).
-
-Box2D is created by Erin Catto and licensed under MIT.
-
-## Next steps
-
-- Read **Getting Started** for setup and first scene.
-- Read **Core Concepts** for lifecycle and API shape.
-- Read **Events And Snapshots** for runtime integration patterns.
+PhysicsScene runs on top of Box2D (`com.badlogicgames.gdx:gdx-box2d`).

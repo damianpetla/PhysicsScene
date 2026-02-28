@@ -1,0 +1,44 @@
+---
+title: Body and Explosion Specs
+description: Low-level configuration knobs for body and shard behavior.
+head: []
+---
+
+## PhysicsBodySpec
+
+`PhysicsBodySpec` controls runtime body setup and impact behavior.
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `bodyType` | `PhysicsBodyType` | `Static`, `Dynamic`, or `Kinematic`. |
+| `density` | `Float` | Fixture density. |
+| `friction` | `Float` | Contact friction coefficient. |
+| `restitution` | `Float` | Bounce coefficient. |
+| `linearDamping` | `Float` | Per-step linear damping. |
+| `angularDamping` | `Float` | Per-step angular damping. |
+| `isSensor` | `Boolean` | Sensor-like body without physical response. |
+| `removeOnFloorContact` | `Boolean` | Remove body after floor cleanup contact. |
+| `explodeOnFirstImpact` | `Boolean` | Trigger shatter on first allowed impact. |
+| `explodeOnImpactByIds` | `Set<PhysicsId>` | Optional allow-list of hitter IDs. |
+| `explosionSpec` | `ExplosionSpec` | Shard generation settings. |
+
+## ExplosionSpec
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `enabled` | `Boolean` | Enables shatter pipeline. |
+| `shardsRows` | `Int` | Requested shard row count. |
+| `shardsCols` | `Int` | Requested shard column count. |
+| `squareShards` | `Boolean` | Runtime can rebalance columns for square-ish cells. |
+| `shardColliderShape` | `ShardColliderShape` | `Box` or `Circle`. |
+| `shardTtlMs` | `Int` | Shard lifetime in ms (`<= 0` means keep alive). |
+| `impulseMin` | `Float` | Minimum shard launch impulse. |
+| `impulseMax` | `Float` | Maximum shard launch impulse. |
+
+## Body type mapping
+
+`PhysicsBodyType` values map directly to Box2D body definitions:
+
+- `Static`
+- `Dynamic`
+- `Kinematic`

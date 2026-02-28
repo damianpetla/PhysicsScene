@@ -1,0 +1,42 @@
+---
+title: PhysicsScene
+description: Main composable hosting the Box2D-backed scene.
+head: []
+---
+
+`PhysicsScene` is the runtime host. It owns the physics world, steps simulation on a fixed loop, syncs layout nodes, and renders shards.
+
+## Signature
+
+```kotlin
+@Composable
+fun PhysicsScene(
+  modifier: Modifier = Modifier,
+  state: PhysicsSceneState = rememberPhysicsSceneState(),
+  onEvent: (PhysicsSceneEvent) -> Unit = {},
+  content: @Composable () -> Unit,
+)
+```
+
+## Parameters
+
+| Parameter | Type | Purpose |
+| --- | --- | --- |
+| `modifier` | `Modifier` | Applies layout and visual constraints to scene root. |
+| `state` | `PhysicsSceneState` | Command + snapshot state for scene control. |
+| `onEvent` | `(PhysicsSceneEvent) -> Unit` | Runtime event stream callback. |
+| `content` | `@Composable () -> Unit` | Compose content with bodies registered via `Modifier.physicsBody`. |
+
+## Runtime model
+
+1. `content` registers nodes using `Modifier.physicsBody`.
+2. Node bounds and specs are synchronized into Box2D bodies.
+3. A fixed-step loop advances simulation (`fixedStepHz`, `maxSubStepsPerFrame`).
+4. Visual transforms are applied back to Compose nodes.
+5. Shards are rendered and shard snapshots are published.
+
+## Important behavior
+
+- Body IDs are stable runtime keys. Reuse the same ID for the same logical item.
+- Scene-local pixels are converted to Box2D meters internally using `pixelsPerMeter`.
+- When a body enters `Shattering` or `Removed`, the original composable is hidden and only shards are rendered.

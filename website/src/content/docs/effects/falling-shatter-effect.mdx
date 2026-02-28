@@ -1,0 +1,39 @@
+---
+title: FallingShatterEffect
+description: Preset for falling components that shatter on first impact.
+head: []
+---
+
+`FallingShatterEffect` configures an impact-triggered shatter pipeline.
+
+## Characteristics
+
+- Produces `explodeOnFirstImpact = true`.
+- Clamps shard rows and columns to at least `1`.
+- Ensures `impulseMax >= impulseMin`.
+- Defaults to `ShardColliderShape.Box`.
+
+## Typical use
+
+```kotlin
+Modifier.physicsBody(
+  id = "drop_button",
+  effect = FallingShatterEffect(
+    shardsRows = 5,
+    shardsCols = 5,
+    shardColliderShape = ShardColliderShape.Circle,
+    impulseMin = 0.08f,
+    impulseMax = 0.22f,
+  )
+)
+```
+
+## Good tuning targets
+
+- Increase `restitution` for bouncier impact.
+- Increase `linearDamping` and `angularDamping` for faster calm-down.
+- Set `shardTtlMs` for automatic shard cleanup.
+
+## Related example
+
+- [Falling Shatter Demo](../examples/falling-shatter-demo/)

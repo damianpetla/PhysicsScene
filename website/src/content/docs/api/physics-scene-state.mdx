@@ -1,0 +1,46 @@
+---
+title: PhysicsSceneState
+description: Commands, snapshots, and scene control.
+head: []
+---
+
+`PhysicsSceneState` is your control plane for runtime commands and observability.
+
+## Create state
+
+```kotlin
+val state = rememberPhysicsSceneState(
+  pixelsPerMeter = 100f,
+  gravityPxPerSecondSq = Offset(0f, 2200f),
+  fixedStepHz = 60,
+  maxSubStepsPerFrame = 5,
+)
+```
+
+## Command API
+
+| Method | Purpose |
+| --- | --- |
+| `activateBody(id)` | Activates an idle body into dynamic simulation. |
+| `explode(id)` | Starts shattering (or removal fallback if shards unavailable). |
+| `remove(id)` | Removes body and owned shards. |
+| `respawnBody(id)` | Clears removed tombstone and restores `Idle`. |
+| `applyLinearImpulse(id, impulsePx)` | Applies impulse vector to body center. |
+| `pulseFromBody(originId, radiusPx, impulse)` | Emits radial impulse from one body. |
+| `attractShards(ownerId, targetPx, impulsePx, maxDistancePx)` | Pulls shards toward a point. |
+| `removeShard(shardId)` | Removes one shard by runtime ID. |
+| `resetScene()` | Clears all runtime state and snapshots. |
+
+## Snapshot API
+
+| Property/Method | Type | Notes |
+| --- | --- | --- |
+| `bodySnapshots` | `StateFlow<Map<PhysicsId, PhysicsBodySnapshot>>` | Live body transforms keyed by ID. |
+| `shardSnapshots` | `StateFlow<List<PhysicsShardSnapshot>>` | Live shard list. |
+| `bodySnapshot(id)` | `PhysicsBodySnapshot?` | Pull latest body snapshot for one ID. |
+| `shardSnapshots(ownerId = ...)` | `List<PhysicsShardSnapshot>` | Optional filter by owner ID. |
+
+## Reset vs Respawn
+
+- Use `resetScene()` for a global hard reset.
+- Use `respawnBody(id)` for per-item recovery without dropping whole scene runtime state.

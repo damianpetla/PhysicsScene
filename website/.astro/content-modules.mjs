@@ -1,0 +1,21 @@
+
+export default new Map([
+["src/content/docs/core-concepts.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fcore-concepts.mdx&astroContentModuleFlag=true")],
+["src/content/docs/events-and-snapshots.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fevents-and-snapshots.mdx&astroContentModuleFlag=true")],
+["src/content/docs/getting-started.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fgetting-started.mdx&astroContentModuleFlag=true")],
+["src/content/docs/index.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Findex.mdx&astroContentModuleFlag=true")],
+["src/content/docs/api/events-lifecycle-snapshots.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fapi%2Fevents-lifecycle-snapshots.mdx&astroContentModuleFlag=true")],
+["src/content/docs/api/body-and-explosion-specs.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fapi%2Fbody-and-explosion-specs.mdx&astroContentModuleFlag=true")],
+["src/content/docs/api/modifier-physics-body.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fapi%2Fmodifier-physics-body.mdx&astroContentModuleFlag=true")],
+["src/content/docs/api/physics-scene-state.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fapi%2Fphysics-scene-state.mdx&astroContentModuleFlag=true")],
+["src/content/docs/api/physics-scene.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fapi%2Fphysics-scene.mdx&astroContentModuleFlag=true")],
+["src/content/docs/effects/center-burst-effect.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Feffects%2Fcenter-burst-effect.mdx&astroContentModuleFlag=true")],
+["src/content/docs/effects/custom-effect.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Feffects%2Fcustom-effect.mdx&astroContentModuleFlag=true")],
+["src/content/docs/effects/falling-shatter-effect.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Feffects%2Ffalling-shatter-effect.mdx&astroContentModuleFlag=true")],
+["src/content/docs/effects/gallery.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Feffects%2Fgallery.mdx&astroContentModuleFlag=true")],
+["src/content/docs/effects/overview.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Feffects%2Foverview.mdx&astroContentModuleFlag=true")],
+["src/content/docs/examples/center-burst-demo.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fexamples%2Fcenter-burst-demo.mdx&astroContentModuleFlag=true")],
+["src/content/docs/examples/emoji-cannon-demo.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fexamples%2Femoji-cannon-demo.mdx&astroContentModuleFlag=true")],
+["src/content/docs/examples/falling-shatter-demo.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fexamples%2Ffalling-shatter-demo.mdx&astroContentModuleFlag=true")],
+["src/content/docs/examples/shard-recall-demo.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fexamples%2Fshard-recall-demo.mdx&astroContentModuleFlag=true")]]);
+		

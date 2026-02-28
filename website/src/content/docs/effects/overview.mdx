@@ -1,0 +1,28 @@
+---
+title: Effects Overview
+description: Built-in effects and when to choose each one.
+head: []
+---
+
+PhysicsScene exposes high-level effects via `PhysicsEffect`, each building a `PhysicsBodySpec`.
+
+## Built-ins
+
+| Effect | Trigger model | Best for |
+| --- | --- | --- |
+| `FallingShatterEffect` | Impact-triggered | Falling cards/buttons that break on first hit. |
+| `CenterBurstEffect` | Explicit `explode(id)` | Controlled burst interactions, often with zero gravity. |
+| `CustomEffect` | Your rule | Fully custom behavior using `baseSpec` transformation. |
+
+## Selection guide
+
+- Choose `FallingShatterEffect` for simple “drop and break”.
+- Choose `CenterBurstEffect` for explicit tap-triggered bursts.
+- Choose `CustomEffect` when defaults are close but not enough.
+
+## Next pages
+
+- [FallingShatterEffect](./falling-shatter-effect/)
+- [CenterBurstEffect](./center-burst-effect/)
+- [CustomEffect](./custom-effect/)
+- [Effects Gallery (GIF-ready)](./gallery/)

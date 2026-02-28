@@ -1,0 +1,20 @@
+---
+title: Shard Recall Demo
+description: Shatter and pull shards back to rebuild the original shape.
+head: []
+---
+
+Source reference: `app-demo/.../ReassembleRecallDemoScreen.kt`
+
+## What this demo shows
+
+- `CustomEffect` extending `CenterBurstEffect`.
+- Delayed transition from shatter to recall phase.
+- Active shard orchestration with attraction and selective shard removal.
+
+## Key APIs
+
+- `CustomEffect`
+- `attractShards(ownerId, targetPx, impulsePx, maxDistancePx)`
+- `removeShard(shardId)`
+- `bodySnapshot(id)` and `shardSnapshots(ownerId)`

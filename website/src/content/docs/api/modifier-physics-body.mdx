@@ -1,0 +1,64 @@
+---
+title: Modifier.physicsBody
+description: Register composables as physics bodies.
+head: []
+---
+
+`Modifier.physicsBody` maps any composable into a runtime physics body tracked by `PhysicsScene`.
+
+## Overloads
+
+```kotlin
+fun Modifier.physicsBody(
+  id: PhysicsId,
+  spec: PhysicsBodySpec,
+): Modifier
+```
+
+```kotlin
+fun Modifier.physicsBody(
+  id: PhysicsId,
+  effect: PhysicsEffect,
+  baseSpec: PhysicsBodySpec = PhysicsBodySpec(),
+): Modifier
+```
+
+## Parameters
+
+| Parameter | Purpose |
+| --- | --- |
+| `id` | Stable runtime key for this body. |
+| `spec` | Full low-level body configuration. |
+| `effect` | High-level preset that produces final `PhysicsBodySpec`. |
+| `baseSpec` | Input spec for effect composition. |
+
+## Placement rule
+
+Modifier order matters. Place `physicsBody(...)` before visual draw modifiers (`background`, `border`, `clip`) if the full visual should move/rotate with physics.
+
+## Lifecycle visibility
+
+When lifecycle is `Shattering` or `Removed`, the modifier sets original composable alpha to `0f`. The scene then shows shard rendering only.
+
+## Example: low-level spec
+
+```kotlin
+Modifier.physicsBody(
+  id = "obstacle",
+  spec = PhysicsBodySpec(
+    bodyType = PhysicsBodyType.Static,
+    friction = 0.2f,
+    restitution = 0.1f,
+    isSensor = false,
+  )
+)
+```
+
+## Example: effect preset
+
+```kotlin
+Modifier.physicsBody(
+  id = "cta",
+  effect = FallingShatterEffect(shardsRows = 6, shardsCols = 6),
+)
+```
