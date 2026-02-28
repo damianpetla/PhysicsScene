@@ -4,12 +4,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -18,6 +18,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -30,19 +31,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.damianpetla.physicsscene.PhysicsScene
+import dev.damianpetla.physicsscene.api.BodyActivated
+import dev.damianpetla.physicsscene.api.BodyRemoved
+import dev.damianpetla.physicsscene.api.BodyShatteringStarted
 import dev.damianpetla.physicsscene.api.FallingShatterEffect
-import dev.damianpetla.physicsscene.api.ExplosionSpec
 import dev.damianpetla.physicsscene.api.PhysicsBodySpec
 import dev.damianpetla.physicsscene.api.PhysicsBodyType
 import dev.damianpetla.physicsscene.api.PhysicsEffect
 import dev.damianpetla.physicsscene.api.PhysicsId
-import dev.damianpetla.physicsscene.api.PhysicsItemEvent
-import dev.damianpetla.physicsscene.api.PhysicsItemEventType
 import dev.damianpetla.physicsscene.api.PhysicsLifecycleState
+import dev.damianpetla.physicsscene.api.PhysicsSceneEvent
 import dev.damianpetla.physicsscene.api.ShardColliderShape
 import dev.damianpetla.physicsscene.physicsBody
 import dev.damianpetla.physicsscene.rememberPhysicsSceneState
@@ -99,11 +101,24 @@ fun PhysicsPlaygroundScreen(
                 .padding(paddingValues)
                 .background(MaterialTheme.colorScheme.surface),
             state = physicsState,
-            onItemEvent = { event: PhysicsItemEvent ->
-                if (event.id == DROP_BUTTON_A_ID) {
-                    buttonAStatus = event.type.toLifecycle()
-                } else if (event.id == DROP_BUTTON_B_ID) {
-                    buttonBStatus = event.type.toLifecycle()
+            onEvent = { event: PhysicsSceneEvent ->
+                when (event) {
+                    is BodyActivated -> {
+                        if (event.id == DROP_BUTTON_A_ID) buttonAStatus = PhysicsLifecycleState.Falling
+                        if (event.id == DROP_BUTTON_B_ID) buttonBStatus = PhysicsLifecycleState.Falling
+                    }
+
+                    is BodyShatteringStarted -> {
+                        if (event.id == DROP_BUTTON_A_ID) buttonAStatus = PhysicsLifecycleState.Shattering
+                        if (event.id == DROP_BUTTON_B_ID) buttonBStatus = PhysicsLifecycleState.Shattering
+                    }
+
+                    is BodyRemoved -> {
+                        if (event.id == DROP_BUTTON_A_ID) buttonAStatus = PhysicsLifecycleState.Removed
+                        if (event.id == DROP_BUTTON_B_ID) buttonBStatus = PhysicsLifecycleState.Removed
+                    }
+
+                    else -> Unit
                 }
             },
         ) {
@@ -111,6 +126,11 @@ fun PhysicsPlaygroundScreen(
                 buttonAStatus = buttonAStatus,
                 buttonBStatus = buttonBStatus,
                 onDropClick = { id -> physicsState.activateBody(id) },
+                onRespawnClick = { id ->
+                    physicsState.respawnBody(id)
+                    if (id == DROP_BUTTON_A_ID) buttonAStatus = PhysicsLifecycleState.Idle
+                    if (id == DROP_BUTTON_B_ID) buttonBStatus = PhysicsLifecycleState.Idle
+                },
                 onResetClick = {
                     physicsState.resetScene()
                     buttonAStatus = PhysicsLifecycleState.Idle
@@ -126,6 +146,7 @@ private fun PhysicsPlaygroundContent(
     buttonAStatus: PhysicsLifecycleState,
     buttonBStatus: PhysicsLifecycleState,
     onDropClick: (PhysicsId) -> Unit,
+    onRespawnClick: (PhysicsId) -> Unit,
     onResetClick: () -> Unit,
     enablePhysics: Boolean = true,
 ) {
@@ -144,35 +165,56 @@ private fun PhysicsPlaygroundContent(
                 .padding(top = 8.dp),
             contentAlignment = Alignment.Center,
         ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Button(
-                    onClick = { onDropClick(DROP_BUTTON_A_ID) },
-                    modifier = Modifier
-                        .size(width = 164.dp, height = 48.dp)
-                        .playgroundPhysicsBody(
-                            enabled = enablePhysics,
-                            id = DROP_BUTTON_A_ID,
-                            effect = dropButtonEffectA,
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Button(
+                        onClick = { onDropClick(DROP_BUTTON_A_ID) },
+                        modifier = Modifier
+                            .size(width = 164.dp, height = 48.dp)
+                            .playgroundPhysicsBody(
+                                enabled = enablePhysics,
+                                id = DROP_BUTTON_A_ID,
+                                effect = dropButtonEffectA,
+                            ),
+                    ) {
+                        Text(text = "Drop A")
+                    }
+
+                    Button(
+                        onClick = { onDropClick(DROP_BUTTON_B_ID) },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.tertiary,
+                            contentColor = MaterialTheme.colorScheme.onTertiary,
                         ),
-                ) {
-                    Text(text = "Drop A")
+                        modifier = Modifier
+                            .size(width = 164.dp, height = 48.dp)
+                            .playgroundPhysicsBody(
+                                enabled = enablePhysics,
+                                id = DROP_BUTTON_B_ID,
+                                effect = dropButtonEffectB,
+                            ),
+                    ) {
+                        Text(text = "Drop B")
+                    }
                 }
 
-                Button(
-                    onClick = { onDropClick(DROP_BUTTON_B_ID) },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.tertiary,
-                        contentColor = MaterialTheme.colorScheme.onTertiary,
-                    ),
-                    modifier = Modifier
-                        .size(width = 164.dp, height = 48.dp)
-                        .playgroundPhysicsBody(
-                            enabled = enablePhysics,
-                            id = DROP_BUTTON_B_ID,
-                            effect = dropButtonEffectB,
-                        ),
-                ) {
-                    Text(text = "Drop B")
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OutlinedButton(
+                        onClick = { onRespawnClick(DROP_BUTTON_A_ID) },
+                        modifier = Modifier.size(width = 164.dp, height = 44.dp),
+                    ) {
+                        Text(text = "Respawn A")
+                    }
+
+                    OutlinedButton(
+                        onClick = { onRespawnClick(DROP_BUTTON_B_ID) },
+                        modifier = Modifier.size(width = 164.dp, height = 44.dp),
+                    ) {
+                        Text(text = "Respawn B")
+                    }
                 }
             }
         }
@@ -292,16 +334,6 @@ private fun dropButtonEffect(shardColliderShape: ShardColliderShape): PhysicsEff
     )
 }
 
-private fun PhysicsItemEventType.toLifecycle(): PhysicsLifecycleState {
-    return when (this) {
-        PhysicsItemEventType.Activated -> PhysicsLifecycleState.Falling
-        PhysicsItemEventType.ShatteringStarted -> PhysicsLifecycleState.Shattering
-        PhysicsItemEventType.ShardHit -> PhysicsLifecycleState.Shattering
-        PhysicsItemEventType.ShardDropped -> PhysicsLifecycleState.Shattering
-        PhysicsItemEventType.Removed -> PhysicsLifecycleState.Removed
-    }
-}
-
 private fun Modifier.playgroundPhysicsBody(
     enabled: Boolean,
     id: PhysicsId,
@@ -335,6 +367,7 @@ private fun PhysicsPlaygroundContentPreview() {
             buttonAStatus = PhysicsLifecycleState.Idle,
             buttonBStatus = PhysicsLifecycleState.Idle,
             onDropClick = {},
+            onRespawnClick = {},
             onResetClick = {},
             enablePhysics = false,
         )

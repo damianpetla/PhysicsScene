@@ -19,19 +19,21 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.damianpetla.physicsscene.PhysicsScene
+import dev.damianpetla.physicsscene.api.BodyActivated
+import dev.damianpetla.physicsscene.api.BodyRemoved
+import dev.damianpetla.physicsscene.api.BodyShatteringStarted
 import dev.damianpetla.physicsscene.api.CenterBurstEffect
 import dev.damianpetla.physicsscene.api.PhysicsId
-import dev.damianpetla.physicsscene.api.PhysicsItemEvent
-import dev.damianpetla.physicsscene.api.PhysicsItemEventType
 import dev.damianpetla.physicsscene.api.PhysicsLifecycleState
+import dev.damianpetla.physicsscene.api.PhysicsSceneEvent
 import dev.damianpetla.physicsscene.physicsBody
 import dev.damianpetla.physicsscene.rememberPhysicsSceneState
 import dev.damianpetla.physicsscene.ui.theme.PhysicsSceneTheme
@@ -75,9 +77,21 @@ fun CenterBurstDemoScreen(
                 .padding(paddingValues)
                 .background(MaterialTheme.colorScheme.surface),
             state = physicsState,
-            onItemEvent = { event: PhysicsItemEvent ->
-                if (event.id == CENTER_BURST_BUTTON_ID) {
-                    centerStatus = event.type.toLifecycle()
+            onEvent = { event: PhysicsSceneEvent ->
+                when (event) {
+                    is BodyActivated -> {
+                        if (event.id == CENTER_BURST_BUTTON_ID) centerStatus = PhysicsLifecycleState.Falling
+                    }
+
+                    is BodyShatteringStarted -> {
+                        if (event.id == CENTER_BURST_BUTTON_ID) centerStatus = PhysicsLifecycleState.Shattering
+                    }
+
+                    is BodyRemoved -> {
+                        if (event.id == CENTER_BURST_BUTTON_ID) centerStatus = PhysicsLifecycleState.Removed
+                    }
+
+                    else -> Unit
                 }
             },
         ) {
@@ -122,16 +136,6 @@ fun CenterBurstDemoScreen(
                 }
             }
         }
-    }
-}
-
-private fun PhysicsItemEventType.toLifecycle(): PhysicsLifecycleState {
-    return when (this) {
-        PhysicsItemEventType.Activated -> PhysicsLifecycleState.Falling
-        PhysicsItemEventType.ShatteringStarted -> PhysicsLifecycleState.Shattering
-        PhysicsItemEventType.ShardHit -> PhysicsLifecycleState.Shattering
-        PhysicsItemEventType.ShardDropped -> PhysicsLifecycleState.Shattering
-        PhysicsItemEventType.Removed -> PhysicsLifecycleState.Removed
     }
 }
 

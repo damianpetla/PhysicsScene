@@ -37,13 +37,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.damianpetla.physicsscene.PhysicsScene
+import dev.damianpetla.physicsscene.api.BodyRemoved
 import dev.damianpetla.physicsscene.api.CenterBurstEffect
 import dev.damianpetla.physicsscene.api.CustomEffect
 import dev.damianpetla.physicsscene.api.PhysicsBodySpec
 import dev.damianpetla.physicsscene.api.PhysicsBodyType
 import dev.damianpetla.physicsscene.api.PhysicsId
-import dev.damianpetla.physicsscene.api.PhysicsItemEvent
-import dev.damianpetla.physicsscene.api.PhysicsItemEventType
+import dev.damianpetla.physicsscene.api.PhysicsSceneEvent
 import dev.damianpetla.physicsscene.api.ShardColliderShape
 import dev.damianpetla.physicsscene.physicsBody
 import dev.damianpetla.physicsscene.rememberPhysicsSceneState
@@ -200,8 +200,8 @@ fun ReassembleRecallDemoScreen(
                 .padding(paddingValues)
                 .background(MaterialTheme.colorScheme.surface),
             state = physicsState,
-            onItemEvent = { event: PhysicsItemEvent ->
-                if (event.id == RECALL_BUTTON_ID && event.type == PhysicsItemEventType.Removed) {
+            onEvent = { event: PhysicsSceneEvent ->
+                if (event is BodyRemoved && event.id == RECALL_BUTTON_ID) {
                     phaseLabel = "Shattered. Recall starts in 3s"
                 }
             },

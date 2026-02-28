@@ -1,0 +1,47 @@
+---
+title: Events And Snapshots
+description: Runtime events, snapshot streams, and reset/respawn behavior.
+---
+
+## Runtime events
+
+`PhysicsScene` emits a typed event stream through `onEvent`.
+
+```kotlin
+PhysicsScene(
+  state = sceneState,
+  onEvent = { event ->
+    when (event) {
+      is BodyActivated -> Unit
+      is BodyShatteringStarted -> Unit
+      is BodyRemoved -> Unit
+      is ShardHit -> Unit
+      is ShardDropped -> Unit
+    }
+  }
+) { ... }
+```
+
+Shard events include explicit ownership/collision metadata:
+
+- `ShardHit(ownerId, hitterId, shardId)`
+- `ShardDropped(ownerId, shardId)`
+
+## Snapshot flows
+
+`PhysicsSceneState` provides:
+
+- `bodySnapshots: StateFlow<Map<PhysicsId, PhysicsBodySnapshot>>`
+- `shardSnapshots: StateFlow<List<PhysicsShardSnapshot>>`
+
+Use reactive collection or convenience pull helpers:
+
+- `bodySnapshot(id)`
+- `shardSnapshots(ownerId = ...)`
+
+## Reset vs respawn
+
+- `resetScene()` clears all bodies, shards, snapshots, lifecycle states, and shard id sequence.
+- `respawnBody(id)` clears removed tombstone state for one body id and restores `Idle`.
+
+`respawnBody(id)` is intended for per-item recovery without global scene reset.

@@ -60,10 +60,16 @@ internal val LocalPhysicsSceneContext = androidx.compose.runtime.staticCompositi
 }
 
 /**
- * Registers this composable as a physics body.
+ * Registers a composable as a physics body inside [PhysicsScene].
  *
- * Place this modifier before visual draw modifiers (for example `background`, `border`, `clip`)
- * if you want the full visual to be moved/rotated by physics transforms.
+ * Modifier order matters: place `physicsBody(...)` before visual draw modifiers (for example
+ * `background`, `border`, `clip`) when the complete visual should be transformed by physics.
+ *
+ * While lifecycle is [PhysicsLifecycleState.Shattering] or [PhysicsLifecycleState.Removed], this
+ * modifier hides the original composable (`alpha = 0f`) and only shard rendering is visible.
+ *
+ * @param id Stable body id. Reuse the same id for the same logical item across recompositions.
+ * @param spec Low-level body configuration describing damping, material and shatter behavior.
  */
 fun Modifier.physicsBody(
     id: PhysicsId,
@@ -159,6 +165,13 @@ fun Modifier.physicsBody(
     }
 }
 
+/**
+ * Registers a composable as a physics body by using a high-level [PhysicsEffect] preset.
+ *
+ * @param id Stable body id. Reuse the same id for the same logical item across recompositions.
+ * @param effect Effect preset that transforms [baseSpec] into the final [PhysicsBodySpec].
+ * @param baseSpec Base low-level spec used as input for [effect].
+ */
 fun Modifier.physicsBody(
     id: PhysicsId,
     effect: PhysicsEffect,

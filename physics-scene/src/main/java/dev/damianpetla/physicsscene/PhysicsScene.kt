@@ -35,10 +35,14 @@ import androidx.core.view.drawToBitmap
 import dev.damianpetla.physicsscene.engine.FixedStepAccumulator
 import dev.damianpetla.physicsscene.engine.LayoutPhysicsNode
 import dev.damianpetla.physicsscene.engine.PhysicsWorldController
+import dev.damianpetla.physicsscene.api.BodyActivated
+import dev.damianpetla.physicsscene.api.BodyRemoved
+import dev.damianpetla.physicsscene.api.BodyShatteringStarted
 import dev.damianpetla.physicsscene.api.PhysicsBodySpec
-import dev.damianpetla.physicsscene.api.PhysicsItemEvent
-import dev.damianpetla.physicsscene.api.PhysicsItemEventType
 import dev.damianpetla.physicsscene.api.PhysicsLifecycleState
+import dev.damianpetla.physicsscene.api.PhysicsSceneEvent
+import dev.damianpetla.physicsscene.api.ShardDropped
+import dev.damianpetla.physicsscene.api.ShardHit
 import dev.damianpetla.physicsscene.api.ShardColliderShape
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
@@ -59,11 +63,23 @@ private data class RegisteredPhysicsNode(
     var captureImage: suspend () -> ImageBitmap? = { null },
 )
 
+/**
+ * Hosts a Box2D-backed simulation and renders registered composables as physics bodies.
+ *
+ * The [content] composable should register bodies with `Modifier.physicsBody(...)`.
+ * Scene coordinates are expressed in pixels and internally converted to Box2D meters using
+ * the `pixelsPerMeter` scale configured in [rememberPhysicsSceneState].
+ *
+ * @param modifier Modifier applied to the scene host container.
+ * @param state State object created with [rememberPhysicsSceneState].
+ * @param onEvent Runtime physics events emitted during stepping and collision processing.
+ * @param content Scene content with bodies registered through the physics modifier.
+ */
 @Composable
 fun PhysicsScene(
     modifier: Modifier = Modifier,
     state: PhysicsSceneState = rememberPhysicsSceneState(),
-    onItemEvent: (PhysicsItemEvent) -> Unit = {},
+    onEvent: (PhysicsSceneEvent) -> Unit = {},
     content: @Composable () -> Unit,
 ) {
     val nodeRegistry = remember { mutableStateMapOf<String, RegisteredPhysicsNode>() }
@@ -82,11 +98,22 @@ fun PhysicsScene(
             gravityPxPerSecondSq = state.gravityPxPerSecondSq,
             onItemShouldExplode = { id -> state.explode(id) },
             onItemShouldRemove = { id -> state.remove(id) },
-            onShardHit = { _, hitterId ->
-                onItemEvent(PhysicsItemEvent(hitterId, PhysicsItemEventType.ShardHit))
+            onShardHit = { ownerId, hitterId, shardId ->
+                onEvent(
+                    ShardHit(
+                        ownerId = ownerId,
+                        hitterId = hitterId,
+                        shardId = shardId,
+                    ),
+                )
             },
-            onShardDropped = { ownerId ->
-                onItemEvent(PhysicsItemEvent(ownerId, PhysicsItemEventType.ShardDropped))
+            onShardDropped = { ownerId, shardId ->
+                onEvent(
+                    ShardDropped(
+                        ownerId = ownerId,
+                        shardId = shardId,
+                    ),
+                )
             },
         )
     }
@@ -210,7 +237,7 @@ fun PhysicsScene(
                     if (activated) {
                         activationRetryCount.remove(command.id)
                         state.setLifecycle(command.id, PhysicsLifecycleState.Falling)
-                        onItemEvent(PhysicsItemEvent(command.id, PhysicsItemEventType.Activated))
+                        onEvent(BodyActivated(command.id))
                     } else {
                         val attempts = (activationRetryCount[command.id] ?: 0) + 1
                         activationRetryCount[command.id] = attempts
@@ -247,7 +274,7 @@ fun PhysicsScene(
                         val spec = controller.bodySpecFor(command.id)?.explosionSpec
                         if (spec == null) {
                             state.setLifecycle(command.id, PhysicsLifecycleState.Removed)
-                            onItemEvent(PhysicsItemEvent(command.id, PhysicsItemEventType.Removed))
+                            onEvent(BodyRemoved(command.id))
                             explodingIds.remove(command.id)
                             return@launch
                         }
@@ -265,7 +292,7 @@ fun PhysicsScene(
                             delay(120)
                             controller.remove(command.id)
                             state.setLifecycle(command.id, PhysicsLifecycleState.Removed)
-                            onItemEvent(PhysicsItemEvent(command.id, PhysicsItemEventType.Removed))
+                            onEvent(BodyRemoved(command.id))
                             explodingIds.remove(command.id)
                             return@launch
                         }
@@ -284,15 +311,15 @@ fun PhysicsScene(
                         if (!didShatter) {
                             controller.remove(command.id)
                             state.setLifecycle(command.id, PhysicsLifecycleState.Removed)
-                            onItemEvent(PhysicsItemEvent(command.id, PhysicsItemEventType.Removed))
+                            onEvent(BodyRemoved(command.id))
                             explodingIds.remove(command.id)
                             return@launch
                         }
 
                         state.setLifecycle(command.id, PhysicsLifecycleState.Shattering)
-                        onItemEvent(PhysicsItemEvent(command.id, PhysicsItemEventType.ShatteringStarted))
+                        onEvent(BodyShatteringStarted(command.id))
                         state.setLifecycle(command.id, PhysicsLifecycleState.Removed)
-                        onItemEvent(PhysicsItemEvent(command.id, PhysicsItemEventType.Removed))
+                        onEvent(BodyRemoved(command.id))
                         explodingIds.remove(command.id)
                     }
                 }
@@ -300,7 +327,12 @@ fun PhysicsScene(
                 is PhysicsCommand.Remove -> {
                     controller.remove(command.id)
                     state.setLifecycle(command.id, PhysicsLifecycleState.Removed)
-                    onItemEvent(PhysicsItemEvent(command.id, PhysicsItemEventType.Removed))
+                    onEvent(BodyRemoved(command.id))
+                }
+
+                is PhysicsCommand.Respawn -> {
+                    controller.respawn(command.id)
+                    state.setLifecycle(command.id, PhysicsLifecycleState.Idle)
                 }
 
                 is PhysicsCommand.ApplyLinearImpulse -> {
