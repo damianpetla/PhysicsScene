@@ -88,7 +88,7 @@ Box2D is created by Erin Catto and is licensed under MIT. Per the official FAQ, 
 
 PhysicsScene follows SemVer.
 
-- Current baseline: `0.1.0`
+- Current baseline: `0.2.0`
 - Breaking API changes are possible before `1.0.0`
 
 ## License

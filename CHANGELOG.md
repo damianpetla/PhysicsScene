@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-02-28
+
 ### Breaking
 - Replaced `PhysicsItemEventType` + `PhysicsItemEvent` with typed `PhysicsSceneEvent` hierarchy:
   - `BodyActivated`
@@ -42,3 +44,4 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Removed `:app` module from the project.
 - Removed AGSL-based demo code paths to keep repository physics-first.
+
