@@ -61,6 +61,40 @@ private const val RECALL_CAPTURE_MARGIN_PX = 14f
 private const val RECALL_SHARDS_ROWS = 4
 private const val RECALL_SHARDS_COLS = 8
 
+private val RECALL_ANCHOR_SPEC = PhysicsBodySpec(
+    bodyType = PhysicsBodyType.Static,
+    isSensor = true,
+)
+private val RECALL_HUD_SPEC = PhysicsBodySpec(
+    bodyType = PhysicsBodyType.Static,
+    isSensor = true,
+)
+private val REASSEMBLE_EFFECT: CustomEffect = run {
+    val base = CenterBurstEffect(
+        shardsRows = RECALL_SHARDS_ROWS,
+        shardsCols = RECALL_SHARDS_COLS,
+        squareShards = true,
+        impulseMin = 0.12f,
+        impulseMax = 0.28f,
+    )
+    CustomEffect { spec ->
+        val bodySpec = base.bodySpec(spec)
+        bodySpec.copy(
+            explodeOnFirstImpact = false,
+            friction = 0.52f,
+            restitution = 0.08f,
+            linearDamping = 0.22f,
+            angularDamping = 0.24f,
+            explosionSpec = bodySpec.explosionSpec.copy(
+                shardTtlMs = -1,
+                impulseMin = 0.12f,
+                impulseMax = 0.28f,
+                shardColliderShape = ShardColliderShape.Box,
+            ),
+        )
+    }
+}
+
 private enum class RecallPhase {
     Idle,
     WaitingRecall,
@@ -213,10 +247,7 @@ fun ReassembleRecallDemoScreen(
                         .size(width = buttonWidthDp, height = buttonHeightDp)
                         .physicsBody(
                             id = RECALL_ANCHOR_ID,
-                            spec = PhysicsBodySpec(
-                                bodyType = PhysicsBodyType.Static,
-                                isSensor = true,
-                            ),
+                            spec = RECALL_ANCHOR_SPEC,
                         ),
                 )
 
@@ -238,7 +269,7 @@ fun ReassembleRecallDemoScreen(
                         .size(width = buttonWidthDp, height = buttonHeightDp)
                         .physicsBody(
                             id = RECALL_BUTTON_ID,
-                            effect = reassembleEffect(),
+                            effect = REASSEMBLE_EFFECT,
                         ),
                 ) {
                     Text(text = "Recall Shatter")
@@ -277,10 +308,7 @@ fun ReassembleRecallDemoScreen(
                         .padding(horizontal = 20.dp, vertical = 16.dp)
                         .physicsBody(
                             id = "reassemble_hud",
-                            spec = PhysicsBodySpec(
-                                bodyType = PhysicsBodyType.Static,
-                                isSensor = true,
-                            ),
+                            spec = RECALL_HUD_SPEC,
                         ),
                 ) {
                     Column(
@@ -307,32 +335,6 @@ fun ReassembleRecallDemoScreen(
                 }
             }
         }
-    }
-}
-
-private fun reassembleEffect(): CustomEffect {
-    val base = CenterBurstEffect(
-        shardsRows = RECALL_SHARDS_ROWS,
-        shardsCols = RECALL_SHARDS_COLS,
-        squareShards = true,
-        impulseMin = 0.12f,
-        impulseMax = 0.28f,
-    )
-    return CustomEffect { spec ->
-        val bodySpec = base.bodySpec(spec)
-        bodySpec.copy(
-            explodeOnFirstImpact = false,
-            friction = 0.52f,
-            restitution = 0.08f,
-            linearDamping = 0.22f,
-            angularDamping = 0.24f,
-            explosionSpec = bodySpec.explosionSpec.copy(
-                shardTtlMs = -1,
-                impulseMin = 0.12f,
-                impulseMax = 0.28f,
-                shardColliderShape = ShardColliderShape.Box,
-            ),
-        )
     }
 }
 

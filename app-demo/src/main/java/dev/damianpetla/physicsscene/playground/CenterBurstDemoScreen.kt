@@ -39,6 +39,7 @@ import dev.damianpetla.physicsscene.rememberPhysicsSceneState
 import dev.damianpetla.physicsscene.ui.theme.PhysicsSceneTheme
 
 private const val CENTER_BURST_BUTTON_ID: PhysicsId = "center_burst_button"
+private val CENTER_BURST_EFFECT = CenterBurstEffect()
 
 @Composable
 fun CenterBurstDemoScreen(
@@ -103,7 +104,7 @@ fun CenterBurstDemoScreen(
                         .size(width = 176.dp, height = 56.dp)
                         .physicsBody(
                             id = CENTER_BURST_BUTTON_ID,
-                            effect = CenterBurstEffect(),
+                            effect = CENTER_BURST_EFFECT,
                         ),
                 ) {
                     Text(text = "Explode Center")

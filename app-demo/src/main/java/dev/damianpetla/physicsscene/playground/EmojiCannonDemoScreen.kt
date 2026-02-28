@@ -82,6 +82,29 @@ private const val CANNON_X_SPEED_JITTER = 55f
 private val CANNON_TOP_CLEARANCE = 42.dp
 private val CANNON_PROJECTILE_SIZE = 44.dp
 private val CANNON_SPAWN_OFFSET_Y = (-188).dp
+private val EMOJI_CANNON_HUD_SPEC = PhysicsBodySpec(
+    bodyType = PhysicsBodyType.Static,
+    isSensor = true,
+)
+private val EMOJI_PROJECTILE_SPEC = PhysicsBodySpec(
+    bodyType = PhysicsBodyType.Dynamic,
+    density = CANNON_PROJECTILE_DENSITY,
+    friction = 0.08f,
+    restitution = 0.66f,
+    linearDamping = 0.04f,
+    angularDamping = 0.05f,
+    explodeOnFirstImpact = true,
+    explodeOnImpactByIds = setOf(PhysicsCollisionIds.WORLD_BOUNDS),
+    explosionSpec = ExplosionSpec(
+        shardsRows = 4,
+        shardsCols = 4,
+        squareShards = true,
+        shardColliderShape = ShardColliderShape.Box,
+        shardTtlMs = CANNON_SHARD_TTL_MS,
+        impulseMin = 0.08f,
+        impulseMax = 0.18f,
+    ),
+)
 
 private val cannonEmojiPool = listOf(
     "\uD83D\uDE00", // 😀
@@ -261,10 +284,7 @@ fun EmojiCannonDemoScreen(
                         .padding(horizontal = 18.dp, vertical = 14.dp)
                         .physicsBody(
                             id = "emoji_cannon_hud",
-                            spec = PhysicsBodySpec(
-                                bodyType = PhysicsBodyType.Static,
-                                isSensor = true,
-                            ),
+                            spec = EMOJI_CANNON_HUD_SPEC,
                         ),
                     colors = CardDefaults.cardColors(
                         containerColor = Color(0xCC121A2A),
@@ -360,8 +380,6 @@ private fun BoxScope.EmojiShotNode(
     shouldApplyImpulse: Boolean,
     onImpulseApplied: () -> Unit,
 ) {
-    val projectileSpec = remember { emojiProjectileSpec() }
-
     LaunchedEffect(shot.id, shouldApplyImpulse) {
         if (!shouldApplyImpulse) return@LaunchedEffect
         repeat(24) {
@@ -386,7 +404,7 @@ private fun BoxScope.EmojiShotNode(
             .size(CANNON_PROJECTILE_SIZE)
             .physicsBody(
                 id = shot.id,
-                spec = projectileSpec,
+                spec = EMOJI_PROJECTILE_SPEC,
             ),
         contentAlignment = Alignment.Center,
     ) {
@@ -395,28 +413,6 @@ private fun BoxScope.EmojiShotNode(
             fontSize = 30.sp,
         )
     }
-}
-
-private fun emojiProjectileSpec(): PhysicsBodySpec {
-    return PhysicsBodySpec(
-        bodyType = PhysicsBodyType.Dynamic,
-        density = CANNON_PROJECTILE_DENSITY,
-        friction = 0.08f,
-        restitution = 0.66f,
-        linearDamping = 0.04f,
-        angularDamping = 0.05f,
-        explodeOnFirstImpact = true,
-        explodeOnImpactByIds = setOf(PhysicsCollisionIds.WORLD_BOUNDS),
-        explosionSpec = ExplosionSpec(
-            shardsRows = 4,
-            shardsCols = 4,
-            squareShards = true,
-            shardColliderShape = ShardColliderShape.Box,
-            shardTtlMs = CANNON_SHARD_TTL_MS,
-            impulseMin = 0.08f,
-            impulseMax = 0.18f,
-        ),
-    )
 }
 
 @Preview(showBackground = true, widthDp = 412, heightDp = 915)

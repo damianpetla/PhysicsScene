@@ -4,10 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -19,7 +17,6 @@ import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.toIntSize
@@ -83,11 +80,8 @@ fun Modifier.physicsBody(
         },
     ) {
         val context = LocalPhysicsSceneContext.current
-        @Suppress("UNUSED_VARIABLE")
-        val frameTickNanos = context?.state?.frameTickNanos ?: 0L
         val lifecycle = context?.state?.lifecycleOf(id) ?: PhysicsLifecycleState.Idle
         val visualTransform = context?.visualTransformFor(id) ?: PhysicsNodeVisualTransform()
-        var sizePx by remember { mutableStateOf(IntSize.Zero) }
         val captureLayer = rememberGraphicsLayer()
 
         val captureProvider by rememberUpdatedState<suspend () -> ImageBitmap?>(
@@ -118,7 +112,6 @@ fun Modifier.physicsBody(
         }
 
         this
-            .onSizeChanged { sizePx = it }
             .onGloballyPositioned { coordinates ->
                 val currentLifecycle = context?.state?.lifecycleOf(id) ?: PhysicsLifecycleState.Idle
                 if (currentLifecycle != PhysicsLifecycleState.Idle) {
