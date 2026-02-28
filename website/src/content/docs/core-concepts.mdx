@@ -6,10 +6,12 @@ description: Key concepts in PhysicsScene.
 ## PhysicsScene
 
 Container that hosts your composables and runs the physics world.
+It also emits runtime events via `onEvent`.
 
 ## PhysicsSceneState
 
-State holder used to issue commands (`activateBody`, `explode`, `applyLinearImpulse`, etc.) and observe snapshots.
+State holder used to issue commands (`activateBody`, `explode`, `respawnBody`, `applyLinearImpulse`, etc.)
+and observe snapshot streams.
 
 ## physicsBody modifier
 
@@ -18,3 +20,22 @@ Registers a composable as a body in the scene.
 ## Effects
 
 Built-in presets such as `FallingShatterEffect` and `CenterBurstEffect`, plus `CustomEffect` for advanced shaping.
+
+## Lifecycle
+
+Bodies move through these lifecycle states:
+
+- `Idle`
+- `Falling`
+- `Shattering`
+- `Removed`
+
+Use `respawnBody(id)` to transition a removed body back to `Idle` without calling `resetScene()`.
+
+## Box2D alignment references
+
+PhysicsScene behavior follows these Box2D references:
+
+- Simulation and stepping: https://box2d.org/documentation/md_simulation.html
+- Contacts and filtering: https://box2d.org/documentation/md_collision.html
+- Step ordering basics: https://box2d.org/documentation/hello.html

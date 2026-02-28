@@ -4,10 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -19,7 +17,6 @@ import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.toIntSize
@@ -60,10 +57,16 @@ internal val LocalPhysicsSceneContext = androidx.compose.runtime.staticCompositi
 }
 
 /**
- * Registers this composable as a physics body.
+ * Registers a composable as a physics body inside [PhysicsScene].
  *
- * Place this modifier before visual draw modifiers (for example `background`, `border`, `clip`)
- * if you want the full visual to be moved/rotated by physics transforms.
+ * Modifier order matters: place `physicsBody(...)` before visual draw modifiers (for example
+ * `background`, `border`, `clip`) when the complete visual should be transformed by physics.
+ *
+ * While lifecycle is [PhysicsLifecycleState.Shattering] or [PhysicsLifecycleState.Removed], this
+ * modifier hides the original composable (`alpha = 0f`) and only shard rendering is visible.
+ *
+ * @param id Stable body id. Reuse the same id for the same logical item across recompositions.
+ * @param spec Low-level body configuration describing damping, material and shatter behavior.
  */
 fun Modifier.physicsBody(
     id: PhysicsId,
@@ -77,11 +80,8 @@ fun Modifier.physicsBody(
         },
     ) {
         val context = LocalPhysicsSceneContext.current
-        @Suppress("UNUSED_VARIABLE")
-        val frameTickNanos = context?.state?.frameTickNanos ?: 0L
         val lifecycle = context?.state?.lifecycleOf(id) ?: PhysicsLifecycleState.Idle
         val visualTransform = context?.visualTransformFor(id) ?: PhysicsNodeVisualTransform()
-        var sizePx by remember { mutableStateOf(IntSize.Zero) }
         val captureLayer = rememberGraphicsLayer()
 
         val captureProvider by rememberUpdatedState<suspend () -> ImageBitmap?>(
@@ -112,7 +112,6 @@ fun Modifier.physicsBody(
         }
 
         this
-            .onSizeChanged { sizePx = it }
             .onGloballyPositioned { coordinates ->
                 val currentLifecycle = context?.state?.lifecycleOf(id) ?: PhysicsLifecycleState.Idle
                 if (currentLifecycle != PhysicsLifecycleState.Idle) {
@@ -159,6 +158,13 @@ fun Modifier.physicsBody(
     }
 }
 
+/**
+ * Registers a composable as a physics body by using a high-level [PhysicsEffect] preset.
+ *
+ * @param id Stable body id. Reuse the same id for the same logical item across recompositions.
+ * @param effect Effect preset that transforms [baseSpec] into the final [PhysicsBodySpec].
+ * @param baseSpec Base low-level spec used as input for [effect].
+ */
 fun Modifier.physicsBody(
     id: PhysicsId,
     effect: PhysicsEffect,

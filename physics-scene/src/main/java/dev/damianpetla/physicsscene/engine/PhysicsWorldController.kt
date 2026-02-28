@@ -79,8 +79,8 @@ internal class PhysicsWorldController(
     gravityPxPerSecondSq: Offset,
     private val onItemShouldExplode: (PhysicsId) -> Unit,
     private val onItemShouldRemove: (PhysicsId) -> Unit,
-    private val onShardHit: (ownerId: PhysicsId, hitterId: PhysicsId) -> Unit,
-    private val onShardDropped: (PhysicsId) -> Unit,
+    private val onShardHit: (ownerId: PhysicsId, hitterId: PhysicsId, shardId: Long) -> Unit,
+    private val onShardDropped: (ownerId: PhysicsId, shardId: Long) -> Unit,
 ) {
     private val logTag = "PhysicsWorld"
     private val worldId: b2WorldId = createWorld(gravityPxPerSecondSq)
@@ -214,6 +214,14 @@ internal class PhysicsWorldController(
         outOfBoundsReported -= id
         items.remove(id)?.also { destroyItemEntry(it) }
         removeShardsForOwner(id)
+    }
+
+    fun respawn(id: PhysicsId): Boolean {
+        val wasRemoved = removedIds.remove(id)
+        firstImpactReported -= id
+        outOfBoundsReported -= id
+        removeShardsForOwner(id)
+        return wasRemoved
     }
 
     fun removeShardsForOwner(id: PhysicsId) {
@@ -797,7 +805,7 @@ internal class PhysicsWorldController(
         }
         shardHitByItem.forEach { (shardId, hitterId) ->
             shards[shardId]?.let { shard ->
-                onShardHit(shard.ownerId, hitterId)
+                onShardHit(shard.ownerId, hitterId, shard.id)
             }
             shards.remove(shardId)?.also { destroyShardEntry(it) }
         }
@@ -839,7 +847,7 @@ internal class PhysicsWorldController(
             val centerPx = bodyCenterPx(shard.bodyId)
             val bottomPx = centerPx.y + shard.sizePx.height / 2f
             if (worldHeightPx > 0 && bottomPx >= worldHeightPx - SHARD_REMOVE_AT_FLOOR_MARGIN_PX) {
-                onShardDropped(shard.ownerId)
+                onShardDropped(shard.ownerId, shard.id)
                 toRemove += shard.id
                 return@forEach
             }

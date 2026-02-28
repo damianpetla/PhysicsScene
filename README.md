@@ -23,6 +23,13 @@ val sceneState = rememberPhysicsSceneState()
 
 PhysicsScene(
     state = sceneState,
+    onEvent = { event ->
+        when (event) {
+            is BodyRemoved -> println("Removed ${event.id}")
+            is ShardHit -> println("Shard ${event.shardId} hit by ${event.hitterId}")
+            else -> Unit
+        }
+    },
 ) {
     Button(
         onClick = { sceneState.activateBody("cta") },
@@ -34,6 +41,25 @@ PhysicsScene(
         Text("Drop me")
     }
 }
+```
+
+## Snapshot streams
+
+`PhysicsSceneState` exposes reactive snapshot streams:
+
+- `bodySnapshots: StateFlow<Map<PhysicsId, PhysicsBodySnapshot>>`
+- `shardSnapshots: StateFlow<List<PhysicsShardSnapshot>>`
+
+Use them with `collectAsState()` in Compose or regular flow collection in non-UI layers.
+
+## Respawn a single body
+
+Use `respawnBody(id)` when a body was removed and you want to recreate it from current layout
+without resetting the whole scene:
+
+```kotlin
+sceneState.respawnBody("cta")
+sceneState.activateBody("cta")
 ```
 
 ## Demo app

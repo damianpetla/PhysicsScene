@@ -16,7 +16,15 @@ dependencies {
 ```kotlin
 val sceneState = rememberPhysicsSceneState()
 
-PhysicsScene(state = sceneState) {
+PhysicsScene(
+  state = sceneState,
+  onEvent = { event ->
+    when (event) {
+      is BodyRemoved -> println("Removed ${event.id}")
+      else -> Unit
+    }
+  }
+) {
   Button(
     onClick = { sceneState.activateBody("cta") },
     modifier = Modifier.physicsBody(

@@ -54,13 +54,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.damianpetla.physicsscene.PhysicsScene
 import dev.damianpetla.physicsscene.PhysicsSceneState
+import dev.damianpetla.physicsscene.api.BodyRemoved
 import dev.damianpetla.physicsscene.api.ExplosionSpec
 import dev.damianpetla.physicsscene.api.PhysicsBodySpec
 import dev.damianpetla.physicsscene.api.PhysicsBodyType
 import dev.damianpetla.physicsscene.api.PhysicsCollisionIds
 import dev.damianpetla.physicsscene.api.PhysicsId
-import dev.damianpetla.physicsscene.api.PhysicsItemEvent
-import dev.damianpetla.physicsscene.api.PhysicsItemEventType
+import dev.damianpetla.physicsscene.api.PhysicsSceneEvent
 import dev.damianpetla.physicsscene.api.ShardColliderShape
 import dev.damianpetla.physicsscene.physicsBody
 import dev.damianpetla.physicsscene.rememberPhysicsSceneState
@@ -82,6 +82,29 @@ private const val CANNON_X_SPEED_JITTER = 55f
 private val CANNON_TOP_CLEARANCE = 42.dp
 private val CANNON_PROJECTILE_SIZE = 44.dp
 private val CANNON_SPAWN_OFFSET_Y = (-188).dp
+private val EMOJI_CANNON_HUD_SPEC = PhysicsBodySpec(
+    bodyType = PhysicsBodyType.Static,
+    isSensor = true,
+)
+private val EMOJI_PROJECTILE_SPEC = PhysicsBodySpec(
+    bodyType = PhysicsBodyType.Dynamic,
+    density = CANNON_PROJECTILE_DENSITY,
+    friction = 0.08f,
+    restitution = 0.66f,
+    linearDamping = 0.04f,
+    angularDamping = 0.05f,
+    explodeOnFirstImpact = true,
+    explodeOnImpactByIds = setOf(PhysicsCollisionIds.WORLD_BOUNDS),
+    explosionSpec = ExplosionSpec(
+        shardsRows = 4,
+        shardsCols = 4,
+        squareShards = true,
+        shardColliderShape = ShardColliderShape.Box,
+        shardTtlMs = CANNON_SHARD_TTL_MS,
+        impulseMin = 0.08f,
+        impulseMax = 0.18f,
+    ),
+)
 
 private val cannonEmojiPool = listOf(
     "\uD83D\uDE00", // 😀
@@ -219,9 +242,8 @@ fun EmojiCannonDemoScreen(
                 .padding(paddingValues)
                 .background(Color(0xFF0D1322)),
             state = physicsState,
-            onItemEvent = { event: PhysicsItemEvent ->
-                if (!event.id.startsWith(CANNON_SHOT_ID_PREFIX)) return@PhysicsScene
-                if (event.type == PhysicsItemEventType.Removed) {
+            onEvent = { event: PhysicsSceneEvent ->
+                if (event is BodyRemoved && event.id.startsWith(CANNON_SHOT_ID_PREFIX)) {
                     impulseAppliedIds -= event.id
                     if (shots.removeAll { it.id == event.id }) {
                         explodedCount += 1
@@ -262,10 +284,7 @@ fun EmojiCannonDemoScreen(
                         .padding(horizontal = 18.dp, vertical = 14.dp)
                         .physicsBody(
                             id = "emoji_cannon_hud",
-                            spec = PhysicsBodySpec(
-                                bodyType = PhysicsBodyType.Static,
-                                isSensor = true,
-                            ),
+                            spec = EMOJI_CANNON_HUD_SPEC,
                         ),
                     colors = CardDefaults.cardColors(
                         containerColor = Color(0xCC121A2A),
@@ -285,7 +304,7 @@ fun EmojiCannonDemoScreen(
                                 onClick = { fireEmoji() },
                                 modifier = Modifier.weight(1f),
                             ) {
-                                Text(text = "Strzel Emoji")
+                                Text(text = "Fire Emoji")
                             }
                             OutlinedButton(
                                 onClick = { resetDemo() },
@@ -296,7 +315,7 @@ fun EmojiCannonDemoScreen(
                         }
 
                         Text(
-                            text = "Wystrzelone: $firedCount   Rozbite: $explodedCount   Aktywne: ${shots.size}",
+                            text = "Fired: $firedCount   Shattered: $explodedCount   Active: ${shots.size}",
                             color = Color(0xFFE3ECFF),
                             style = MaterialTheme.typography.bodySmall,
                         )
@@ -361,8 +380,6 @@ private fun BoxScope.EmojiShotNode(
     shouldApplyImpulse: Boolean,
     onImpulseApplied: () -> Unit,
 ) {
-    val projectileSpec = remember { emojiProjectileSpec() }
-
     LaunchedEffect(shot.id, shouldApplyImpulse) {
         if (!shouldApplyImpulse) return@LaunchedEffect
         repeat(24) {
@@ -387,7 +404,7 @@ private fun BoxScope.EmojiShotNode(
             .size(CANNON_PROJECTILE_SIZE)
             .physicsBody(
                 id = shot.id,
-                spec = projectileSpec,
+                spec = EMOJI_PROJECTILE_SPEC,
             ),
         contentAlignment = Alignment.Center,
     ) {
@@ -396,28 +413,6 @@ private fun BoxScope.EmojiShotNode(
             fontSize = 30.sp,
         )
     }
-}
-
-private fun emojiProjectileSpec(): PhysicsBodySpec {
-    return PhysicsBodySpec(
-        bodyType = PhysicsBodyType.Dynamic,
-        density = CANNON_PROJECTILE_DENSITY,
-        friction = 0.08f,
-        restitution = 0.66f,
-        linearDamping = 0.04f,
-        angularDamping = 0.05f,
-        explodeOnFirstImpact = true,
-        explodeOnImpactByIds = setOf(PhysicsCollisionIds.WORLD_BOUNDS),
-        explosionSpec = ExplosionSpec(
-            shardsRows = 4,
-            shardsCols = 4,
-            squareShards = true,
-            shardColliderShape = ShardColliderShape.Box,
-            shardTtlMs = CANNON_SHARD_TTL_MS,
-            impulseMin = 0.08f,
-            impulseMax = 0.18f,
-        ),
-    )
 }
 
 @Preview(showBackground = true, widthDp = 412, heightDp = 915)
