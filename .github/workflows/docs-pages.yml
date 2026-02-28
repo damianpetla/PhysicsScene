@@ -1,13 +1,9 @@
 name: Docs Pages
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'website/**'
-      - '.github/workflows/docs-pages.yml'
-  workflow_dispatch:
+  release:
+    types:
+      - published
 
 permissions:
   contents: read
@@ -20,11 +16,14 @@ concurrency:
 
 jobs:
   build:
+    if: startsWith(github.event.release.tag_name, 'v')
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
