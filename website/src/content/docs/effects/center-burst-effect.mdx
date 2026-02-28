@@ -1,0 +1,42 @@
+---
+title: CenterBurstEffect
+description: Preset for explicit burst actions (tap to explode).
+head: []
+---
+
+`CenterBurstEffect` is designed for intentional burst actions controlled by `explode(id)`.
+
+## Characteristics
+
+- Produces `explodeOnFirstImpact = false`.
+- Uses `ShardColliderShape.Circle` by default.
+- Keeps shard grid square-ish when `squareShards = true`.
+
+## Typical use
+
+```kotlin
+Button(
+  onClick = { sceneState.explode("center") },
+  modifier = Modifier.physicsBody(
+    id = "center",
+    effect = CenterBurstEffect(
+      shardsRows = 6,
+      shardsCols = 6,
+      impulseMin = 0.18f,
+      impulseMax = 0.42f,
+    ),
+  ),
+) {
+  Text("Explode Center")
+}
+```
+
+## Good tuning targets
+
+- Use zero gravity for clean radial burst visuals.
+- Increase `shardsRows`/`shardsCols` for finer fragment density.
+- Lower `impulseMax` for tighter, less chaotic bursts.
+
+## Related example
+
+- [Center Burst Demo](../examples/center-burst-demo/)

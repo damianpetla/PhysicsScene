@@ -1,0 +1,59 @@
+---
+title: Events, Lifecycle, Snapshots
+description: Runtime events, body lifecycle transitions, and data streams.
+head: []
+---
+
+## Runtime events
+
+`PhysicsScene` emits a typed event stream through `onEvent`.
+
+```kotlin
+PhysicsScene(
+  state = state,
+  onEvent = { event ->
+    when (event) {
+      is BodyActivated -> Unit
+      is BodyShatteringStarted -> Unit
+      is BodyRemoved -> Unit
+      is ShardHit -> Unit
+      is ShardDropped -> Unit
+    }
+  }
+) { /* content */ }
+```
+
+## Event payloads
+
+| Event | Payload |
+| --- | --- |
+| `BodyActivated` | `id` |
+| `BodyShatteringStarted` | `id` |
+| `BodyRemoved` | `id` |
+| `ShardHit` | `ownerId`, `hitterId`, `shardId` |
+| `ShardDropped` | `ownerId`, `shardId` |
+
+`PhysicsCollisionIds.WORLD_BOUNDS` is a reserved collision ID used by runtime bounds interactions.
+
+## Lifecycle states
+
+Bodies move through these states:
+
+1. `Idle`
+2. `Falling`
+3. `Shattering`
+4. `Removed`
+
+Typical flow:
+
+- `activateBody(id)` drives `Idle -> Falling`
+- shatter trigger drives `Falling -> Shattering`
+- cleanup drives `Shattering -> Removed`
+- `respawnBody(id)` restores `Removed -> Idle`
+
+## Snapshot streams
+
+Use snapshots for HUD/state sync, debug overlays, analytics, or custom orchestration logic.
+
+- `bodySnapshots` for body transforms.
+- `shardSnapshots` for shard-level tracking.

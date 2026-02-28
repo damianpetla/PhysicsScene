@@ -1,0 +1,26 @@
+---
+title: Falling Shatter Demo
+description: Falling buttons that shatter on first impact.
+head: []
+---
+
+Source reference: `app-demo/.../PhysicsPlaygroundScreen.kt`
+
+## What this demo shows
+
+- Two buttons activated with `activateBody(id)`.
+- Different shard collider shapes (`Box` and `Circle`).
+- Lifecycle transitions and respawn flow.
+
+## Key APIs
+
+- `FallingShatterEffect`
+- `activateBody(id)`
+- `respawnBody(id)`
+- `resetScene()`
+
+## Minimal interaction loop
+
+1. Activate body.
+2. Wait for shatter and removal events.
+3. Respawn selected body or reset entire scene.

@@ -1,0 +1,52 @@
+---
+title: CustomEffect
+description: Build your own effect by transforming base specs.
+head: []
+---
+
+`CustomEffect` is a functional adapter over `PhysicsEffect`.
+
+## Signature
+
+```kotlin
+fun interface CustomEffect : PhysicsEffect {
+  override fun bodySpec(baseSpec: PhysicsBodySpec): PhysicsBodySpec
+}
+```
+
+## Why use it
+
+Use `CustomEffect` when built-ins are close but you need precise low-level overrides.
+
+## Example
+
+```kotlin
+private val RecallEffect: CustomEffect = run {
+  val base = CenterBurstEffect(
+    shardsRows = 4,
+    shardsCols = 8,
+    impulseMin = 0.12f,
+    impulseMax = 0.28f,
+  )
+
+  CustomEffect { input ->
+    val spec = base.bodySpec(input)
+    spec.copy(
+      friction = 0.52f,
+      restitution = 0.08f,
+      linearDamping = 0.22f,
+      angularDamping = 0.24f,
+      explosionSpec = spec.explosionSpec.copy(
+        shardColliderShape = ShardColliderShape.Box,
+        shardTtlMs = -1,
+      ),
+    )
+  }
+}
+```
+
+This pattern is used in the shard recall demo to keep shards alive and controllable for reassembly.
+
+## Related example
+
+- [Shard Recall Demo](../examples/shard-recall-demo/)

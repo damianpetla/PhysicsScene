@@ -1,0 +1,20 @@
+---
+title: Emoji Cannon Demo
+description: Moving cannon launches dynamic emoji bodies that shatter on impact.
+head: []
+---
+
+Source reference: `app-demo/.../EmojiCannonDemoScreen.kt`
+
+## What this demo shows
+
+- Dynamic projectile spawning with per-shot body IDs.
+- Manual impulse control for launch trajectories.
+- Impact-triggered shatter scoped to world bounds collisions.
+
+## Key APIs
+
+- `PhysicsBodySpec(bodyType = Dynamic, ...)`
+- `applyLinearImpulse(id, impulsePx)`
+- `explodeOnImpactByIds = setOf(PhysicsCollisionIds.WORLD_BOUNDS)`
+- `remove(id)` and `resetScene()` for cleanup

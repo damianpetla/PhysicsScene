@@ -2,4 +2,93 @@
   --sl-color-accent-low: #d4e6ff;
   --sl-color-accent: #2a6df4;
   --sl-color-accent-high: #0a2e73;
+  --ps-card-border: color-mix(in oklab, var(--sl-color-gray-5) 22%, transparent);
+  --ps-card-bg: color-mix(in oklab, var(--sl-color-bg) 85%, var(--sl-color-accent-low) 15%);
+}
+
+:root[data-theme='dark'] {
+  --sl-color-accent-low: #10284d;
+  --sl-color-accent: #8ab8ff;
+  --sl-color-accent-high: #dce9ff;
+}
+
+.ps-callout {
+  border: 1px solid var(--ps-card-border);
+  background: var(--ps-card-bg);
+  border-radius: 12px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.ps-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  align-items: stretch;
+  margin: 1rem 0;
+}
+
+/* Prevent Starlight markdown flow spacing from offsetting grid items. */
+.sl-markdown-content .ps-grid > * {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.ps-card {
+  border: 1px solid var(--ps-card-border);
+  border-radius: 12px;
+  padding: 1rem;
+  background: color-mix(in oklab, var(--sl-color-bg) 92%, var(--sl-color-accent-low) 8%);
+  display: flex;
+  flex-direction: column;
+  min-height: 220px;
+  height: 100%;
+}
+
+.ps-card h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.ps-card p {
+  margin: 0;
+}
+
+.ps-card p + p {
+  margin-top: 0.75rem;
+}
+
+.ps-card p:last-child {
+  margin-top: auto;
+}
+
+.sl-markdown-content .ps-card-copy {
+  margin: 0;
+}
+
+.sl-markdown-content .ps-card-cta {
+  margin-top: auto;
+  align-self: flex-start;
+  font-weight: 600;
+}
+
+.effect-media-slot {
+  border: 2px dashed color-mix(in oklab, var(--sl-color-accent) 55%, var(--sl-color-gray-3) 45%);
+  border-radius: 12px;
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 1rem;
+  background: color-mix(in oklab, var(--sl-color-bg) 90%, var(--sl-color-accent-low) 10%);
+}
+
+.effect-media-slot strong {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.effect-meta {
+  color: var(--sl-color-gray-2);
+  font-size: 0.92rem;
 }
